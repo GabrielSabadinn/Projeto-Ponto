@@ -3,7 +3,7 @@
       <div class="container">
         <!-- Logo -->
         <a class="navbar-brand" href="#">
-          <img src="../assets/vue.svg" alt="Logo" height="30">
+          <img src="../assets/ponto-cartao.png" alt="Logo" height="40">
         </a>
   
         <!-- Botão de colapso para dispositivos móveis -->
@@ -17,15 +17,15 @@
           <ul class="navbar-nav ms-auto">
             <!-- Ícone de engrenagem -->
             <li class="nav-item">
-              <a class="nav-link" href="../assets/settings.svg">
-                <i class="fas fa-cog"></i>
-              </a>
+              <router-link to="/settings" class="nav-link">
+                <img src="../assets/settings.svg" alt="Settings" height="30">
+              </router-link>
             </li>
             <!-- Ícone de sair -->
             <li class="nav-item">
-              <a class="nav-link" href="../assets/sair.svg">
-                <i class="fas fa-sign-out-alt"></i>
-              </a>
+              <router-link to="/Login" class="nav-link">
+                <img src="../assets/sair.svg" alt="Logo" height="20">
+              </router-link>
             </li>
           </ul>
         </div>
@@ -35,7 +35,7 @@
   
   <script>
   export default {
-    // Adicione as props, dados e métodos necessários aqui
+   
   };
   </script>
   
