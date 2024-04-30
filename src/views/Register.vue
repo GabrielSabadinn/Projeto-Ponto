@@ -42,26 +42,37 @@
   </template>
   
   <script>
-  export default {
-    data() {
-      return {
-        name: '',
-        email: '',
-        password: '',
-        cpf: '',
-        birthdate: '',
-        rememberMe: false
+import axios from 'axios';
+
+export default {
+  methods: {
+    handleSubmit() {
+      const userData = {
+        nome: this.name,
+        email: this.email,
+        cpf: this.cpf,
+        senha: this.password,
+        data_nascimento: this.birthdate
       };
+
+      axios.post('http://localhost:3000/registroUsuario/register', userData)
+        .then(response => {
+          console.log('Usuário registrado com sucesso:', response.data);
+          // Redirecionar o usuário para a página de login
+          this.$router.push({ path: '/Login' });
+        })
+        .catch(error => {
+          console.error('Erro ao registrar usuário:', error.response.data.message);
+          // Exibir uma mensagem de erro para o usuário ou realizar outras ações necessárias
+        });
     },
-    methods: {
-      handleSubmit() {
-        // Aqui você pode adicionar a lógica para enviar os dados do formulário
-      },
-      goToLogin() {
-        this.$router.push({ name: 'Login' }); 
-      }
+    goToLogin() {
+      this.$router.push({ name: 'Login' });
     }
-  };
+  }
+};
+
+
   </script>
   
   <style scoped>

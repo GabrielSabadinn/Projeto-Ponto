@@ -28,10 +28,18 @@
               <a href="#!">Esqueceu sua senha?</a>
             </div>
 
+            <!-- Mensagem de erro em vermelho -->
+            <p v-if="loginError" class="text-danger">{{ loginError }}</p>
+
+            <!-- Botão de login -->
             <button type="submit" class="btn btn-primary btn-lg mb-2">Logar</button>
+
+            <!-- Divisor -->
             <div class="divider d-flex align-items-center my-4">
               <p class="text-center fw-bold mx-3 mb-0 text-muted">Ou</p>
             </div>
+
+            <!-- Botões adicionais -->
             <div class="d-grid gap-2 d-md-flex justify-content-md-between">
               <button type="button" class="btn btn-primary btn-lg mb-2" @click="goToRegister">Registre-se</button>
               <button class="btn btn-primary btn-lg mb-2" style="background-color: #f12929" @click="continueWithGoogle">
@@ -46,26 +54,50 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   data() {
     return {
       email: '',
       password: '',
-      rememberMe: false
+      rememberMe: false,
+      loginError: '' // Adicione a variável para armazenar a mensagem de erro
     };
   },
   methods: {
     handleSubmit() {
-      // Aqui você pode adicionar a lógica para autenticar o usuário
+      const userData = {
+        email: this.email,
+        senha: this.password
+      };
+
+      axios.post('http://localhost:3000/auth/login', userData)
+        .then(response => {
+          console.log(response.data);
+          
+          // Armazenar token e dados do usuário no localStorage
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('user', JSON.stringify(response.data.user));
+
+          // Redirecionar para a página "/Home" no frontend
+          this.$router.push({ path: '/Home' });
+        })
+        .catch(error => {
+          console.error('Erro ao fazer login:', error.response.data.message);
+          this.loginError = 'Email ou senha incorretos'; // Define a mensagem de erro
+        });
     },
+
     goToRegister() {
-      this.$router.push({ name: 'Register' }); 
+      this.$router.push({ name: 'Register' });
     },
     continueWithGoogle() {
       // Lógica de continuar com o Google (pode ser adicionada aqui)
     }
   }
 };
+
 </script>
 
 <style scoped>
