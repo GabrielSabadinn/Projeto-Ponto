@@ -70,15 +70,27 @@ export default {
       this.modalAberto = false;
     },
     registrarPonto() {
-      const userDataString = document.cookie.split('; ').find(row => row.startsWith('user='));
-      if (!userDataString) {
-        console.error('Informações do usuário não encontradas nos cookies.');
-        return;
-      }
-      const userData = JSON.parse(userDataString.split('=')[1]);
-      const usuario_id = userData.id;
+  // Encontrar o cookie que contém as informações do usuário
+  const userDataCookie = document.cookie.split('; ').find(row => row.startsWith('userData='));
 
-      const tipo = this.tipoRegistro; // Obtendo o tipo de registro atualizado
+  // Verificar se o cookie foi encontrado
+  if (!userDataCookie) {
+    console.error('Cookie de informações do usuário não encontrado.');
+    return;
+  }
+
+  // Extrair o valor do cookie
+  const userDataString = userDataCookie.split('=')[1];
+
+  // Converter a string JSON para um objeto JavaScript
+  const userData = JSON.parse(userDataString);
+
+  // Extrair as informações do usuário do objeto userData
+  const usuario_id = userData.user.id;
+  const email = userData.user.email;
+  // Extrair outras informações conforme necessário
+
+      const tipo = this.tipoRegistro;
 
       const dataHoraFormatada = new Date().toISOString().slice(0, 10) + ' ' + this.horarioSelecionado; // Concatenando a data atual com o horário selecionado
 
@@ -116,16 +128,9 @@ export default {
     }
   }
 };
+
 </script>
 
-
-
-
-
-
-
-  
-  
   <style scoped>
   .ponto-container {
     margin-top: 20px;

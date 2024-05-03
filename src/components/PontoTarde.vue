@@ -70,51 +70,52 @@ export default {
       this.modalAberto = false;
     },
     registrarPonto() {
-      const userDataString = document.cookie.split('; ').find(row => row.startsWith('user='));
-      if (!userDataString) {
-        console.error('Informações do usuário não encontradas nos cookies.');
-        return;
-      }
-      const userData = JSON.parse(userDataString.split('=')[1]);
-      const usuario_id = userData.id;
+  const userDataString = document.cookie.split('; ').find(row => row.startsWith('userData='));
+  if (!userDataString) {
+    console.error('Informações do usuário não encontradas nos cookies.');
+    return;
+  }
+  const userData = JSON.parse(userDataString.split('=')[1]);
+  const usuario_id = userData.user.id;
 
-      const tipo = this.tipoRegistro; // Obtendo o tipo de registro atualizado
+  const tipo = this.tipoRegistro; // Obtendo o tipo de registro atualizado
 
-      const dataHoraFormatada = new Date().toISOString().slice(0, 10) + ' ' + this.horarioSelecionado; // Concatenando a data atual com o horário selecionado
+  const dataHoraFormatada = new Date().toISOString().slice(0, 10) + ' ' + this.horarioSelecionado; // Concatenando a data atual com o horário selecionado
 
-      let data_fim_intervalo = null;
-      let data_saida = null;
+  let data_fim_intervalo = null;
+  let data_saida = null;
 
-      if (tipo === 'entrada') {
-        // No turno da manhã, a entrada é registrada como data_fim_intervalo
-        data_fim_intervalo = dataHoraFormatada;
-      } else {
-        // No turno da manhã, a saída é registrada como data_saida
-        data_saida = dataHoraFormatada;
-        // Data de entrada já foi cadastrada anteriormente, então não é necessário alterá-la aqui
-      }
+  if (tipo === 'entrada') {
+    // No segundo turno, a entrada é registrada como data_fim_intervalo
+    data_fim_intervalo = dataHoraFormatada;
+  } else {
+    // No segundo turno, a saída é registrada como data_saida
+    data_saida = dataHoraFormatada;
+    // Data de entrada já foi cadastrada anteriormente, então não é necessário alterá-la aqui
+  }
 
-      const dadosPonto = {
-        usuario_id,
-        data_fim_intervalo,
-        data_saida
-      };
+  const dadosPonto = {
+    usuario_id,
+    data_fim_intervalo,
+    data_saida
+  };
 
-      axios.post('http://localhost:3000/ponto/cadastrar', dadosPonto, {
-        headers: {
-          Authorization: `Bearer ${this.$store.state.token}` // Enviando token de autenticação
-        }
-      })
-      .then(response => {
-        console.log(response.data.message);
-        this.horarioRegistrado = `${tipo} registrado: ${this.horarioSelecionado}`;
-        this.fecharModal();
-      })
-      .catch(error => {
-        console.error('Erro ao cadastrar ponto:', error.response.data.message);
-        // Trate o erro de acordo com sua lógica de frontend
-      });
+  axios.post('http://localhost:3000/ponto/cadastrar', dadosPonto, {
+    headers: {
+      Authorization: `Bearer ${this.$store.state.token}` // Enviando token de autenticação
     }
+  })
+  .then(response => {
+    console.log(response.data.message);
+    this.horarioRegistrado = `${tipo} registrado: ${this.horarioSelecionado}`;
+    this.fecharModal();
+  })
+  .catch(error => {
+    console.error('Erro ao cadastrar ponto:', error.response.data.message);
+    // Trate o erro de acordo com sua lógica de frontend
+  });
+}
+
   }
 };
 </script>

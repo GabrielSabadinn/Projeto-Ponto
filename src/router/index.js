@@ -38,13 +38,16 @@ const router = createRouter({
 
 router.beforeEach((to, from, next) => {
   if (to.meta.requiresAuth) {
-    const isAuthenticated = localStorage.getItem('token'); 
-    if (isAuthenticated) {
+    const userDataCookie = document.cookie.split('; ').find(row => row.startsWith('userData='));
+    if (userDataCookie) {
+      // Cookie encontrado, o usuário está autenticado
       next(); 
     } else {
+      // Cookie não encontrado, redirecionar para a página de login
       next('/Login'); 
     }
   } else {
+    // Página não requer autenticação, continuar
     next(); 
   }
 });

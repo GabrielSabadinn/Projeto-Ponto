@@ -42,9 +42,7 @@
             <!-- Botões adicionais -->
             <div class="d-grid gap-2 d-md-flex justify-content-md-between">
               <button type="button" class="btn btn-primary btn-lg mb-2" @click="goToRegister">Registre-se</button>
-              <button class="btn btn-primary btn-lg mb-2" style="background-color: #f12929" @click="continueWithGoogle">
-                <i class="fab fa-google me-2"></i>Continuar com Google
-              </button>
+             
             </div>
           </form>
         </div>
@@ -67,35 +65,37 @@ export default {
   },
   methods: {
     handleSubmit() {
-      const userData = {
-        email: this.email,
-        senha: this.password
-      };
+  const userData = {
+    email: this.email,
+    senha: this.password
+  };
 
-      axios.post('http://localhost:3000/auth/login', userData)
-        .then(response => {
-          console.log(response.data);
-          
-          // Armazenar token e dados do usuário no localStorage
-          localStorage.setItem('token', response.data.token);
-          localStorage.setItem('user', JSON.stringify(response.data.user));
+  axios.post('http://localhost:3000/auth/login', userData)
+    .then(response => {
+      console.log(response.data);
 
-          // Redirecionar para a página "/Home" no frontend
-          this.$router.push({ path: '/Home' });
-        })
-        .catch(error => {
-          console.error('Erro ao fazer login:', error.response.data.message);
-          this.loginError = 'Email ou senha incorretos'; // Define a mensagem de erro
-        });
-    },
+      // Serializar o objeto contendo o token e as informações do usuário
+      const cookieValue = JSON.stringify(response.data);
 
-    goToRegister() {
-      this.$router.push({ name: 'Register' });
-    },
-    continueWithGoogle() {
-      // Lógica de continuar com o Google (pode ser adicionada aqui)
-    }
-  }
+      // Armazenar o cookie
+      document.cookie = `userData=${cookieValue}; path=/`;
+
+      // Redirecionar para a página "/Home" no frontend
+      this.$router.push({ path: '/Home' });
+    })
+    .catch(error => {
+      console.error('Erro ao fazer login:', error.response.data.message);
+      this.loginError = 'Email ou senha incorretos'; // Define a mensagem de erro
+    });
+},
+
+
+
+  goToRegister() {
+    this.$router.push({ name: 'Register' });
+  },
+ 
+}
 };
 
 </script>

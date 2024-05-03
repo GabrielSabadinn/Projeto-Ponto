@@ -1,104 +1,92 @@
 <template>
   <div>
+    <!-- Navbar -->
     <Navbar />
+    <!-- Container -->
     <div class="container mt-4">
       <div class="row">
+        <!-- Coluna do perfil do usuário -->
         <div class="col-md-3">
           <!-- Ícone do usuário -->
           <div class="user">
             <i class="fas fa-user">
               <img src="../assets/usuario.png" style="width: 31px;" />
             </i>
-            {{ userData.nome }} <!-- Exibir nome do usuário -->
+            <!-- Nome do usuário -->
+            {{ userData.nome }}
           </div>
-          <div class="user">CPF: {{ userData.cpf }}</div> <!-- Exibir CPF do usuário -->
+          <!-- CPF do usuário -->
+          <div class="user">CPF: {{ userData.cpf }}</div>
         </div>
+        <!-- Coluna dos registros -->
         <div class="col-md-9">
           <!-- Componente de tabela de registros -->
-          <RecordsTable :records="records" @edit-record="openEditModal" @delete-record="openDeleteModal" />
+          <RecordsTable :records="records" @delete-record="handleRecordDeleted" @open-delete-modal="openDeleteModal" />
         </div>
       </div>
-      <!-- Componente de modal de edição -->
-      <EditModal :record="editRecord" @save-changes="saveChanges" />
-      <!-- Modal de confirmação de exclusão -->
-      <DeleteModal @delete-record="deleteRecord" />
     </div>
   </div>
 </template>
 
 <script>
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { Modal } from 'bootstrap';
-import Navbar from '../components/Navbar.vue'
+import Navbar from '../components/Navbar.vue';
 import RecordsTable from '../components/RecordsTable.vue';
-import EditModal from '../components/EditModal.vue';
-import DeleteModal from '../components/DeleteModal.vue';
+
+import axios from 'axios';
 
 export default {
   data() {
     return {
-      userData: JSON.parse(localStorage.getItem('user')) || {}, // Inicialize userData com os dados do localStorage
-      records: [ // Simulação de registros
-          { 
-            primeiroTurno: { entrada: '2024-04-21T08:00', saida: '2024-04-21T12:00' },
-            segundoTurno: { entrada: '2024-04-21T13:00', saida: '2024-04-21T17:00' }
-          },
-          { 
-            primeiroTurno: { entrada: '2024-04-21T08:30', saida: '2024-04-21T12:30' },
-            segundoTurno: { entrada: '2024-04-21T13:30', saida: '2024-04-21T17:30' }
-          },
-          { 
-            primeiroTurno: { entrada: '2024-04-21T09:00', saida: '2024-04-21T13:00' },
-            segundoTurno: { entrada: '2024-04-21T14:00', saida: '2024-04-21T18:00' }
-          }
-        ],
-      editIndex: null,
-      deleteIndex: null,
-      editRecord: {
-        primeiroTurno: { entrada: '', saida: '' },
-        segundoTurno: { entrada: '', saida: '' }
-      }
+      userData: {}, // Dados do usuário
+      records: [], // Registros do usuário
+      deleteIndex: null // Índice do registro a ser excluído
     };
   },
+  created() {
+    // Carregar dados do usuário
+    this.loadUserData();
+    // Carregar registros do usuário
+    this.loadUserPoints();
+  },
   methods: {
-    openEditModal(index) {
-      this.editIndex = index;
-      const modal = new Modal(document.getElementById('editModal'));
-      modal.show();
-    },
     openDeleteModal(index) {
       this.deleteIndex = index;
-      const modal = new Modal(document.getElementById('deleteModal'));
-      modal.show();
     },
-    deleteRecord() {
+    async deleteRecord() {
       if (this.deleteIndex !== null) {
-        this.records.splice(this.deleteIndex, 1);
-        const modal = Modal.getInstance(document.getElementById('deleteModal'));
-        modal.hide();
+        try {
+          await axios.delete(`http://localhost:3000/ponto/excluir/${this.records[this.deleteIndex].id}`);
+          await this.loadUserPoints();
+          this.deleteIndex = null; // Resetando o índice de exclusão após a exclusão ser concluída
+        } catch (error) {
+          console.error('Erro ao excluir o registro:', error.message);
+        }
       }
     },
-    saveChanges() {
-      if (this.editIndex !== null) {
-        // Simula a atualização do registro com os novos valores
-        this.records[this.editIndex] = { ...this.editRecord };
-        const modal = Modal.getInstance(document.getElementById('editModal'));
-        modal.hide();
+    handleRecordDeleted(index) {
+      console.log('Record deleted at index:', index);
+      this.records.splice(index, 1);
+    },
+    loadUserData() {
+      const userDataString = document.cookie.split('; ').find(row => row.startsWith('userData='));
+      if (userDataString) {
+        const userData = JSON.parse(decodeURIComponent(userDataString.split('=')[1]));
+        this.userData = userData.user;
+      }
+    },
+    async loadUserPoints() {
+      try {
+        const response = await axios.get(`http://localhost:3000/ponto/consultar/${this.userData.id}`);
+        this.records = response.data;
+      } catch (error) {
+        console.error('Erro ao carregar pontos do usuário:', error.message);
       }
     }
   },
   components: {
-    RecordsTable,
-    EditModal,
-    DeleteModal,
-    Navbar
+    Navbar,
+    RecordsTable
   }
 };
 </script>
-
-<style scoped>
-.user {
-  width: 400px;
-  font-size: 30px;
-}
-</style>
